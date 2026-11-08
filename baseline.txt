@@ -28,4 +28,4 @@ Vivian: paired confidence intervals and the key figure.
 Jingran: evaluate on the test set once at the end, after all choices are final.
 
 ## Code
-[link]
+https://github.com/RookieT0T/ESE542_Classification_Project
