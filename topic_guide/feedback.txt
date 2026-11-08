@@ -1,0 +1,13 @@
+Proposal feedback: XGBoost row subsampling on Fashion-MNIST
+
+Overall: Go, with the changes below. The experiment is clean, but the question mixes two different things and the baseline is not yet a course method.
+
+Question: Mini-batch size belongs to gradient descent, while XGBoost's subsample is the fraction of rows each tree sees, so pick one; if you keep XGBoost, ask how the subsample ratio changes test accuracy and training time when each ratio gets its own number of boosting rounds by early stopping. Fixed rounds would be unfair, since smaller ratios may need more.
+Check against: Yes: the official 10,000-image test set, touched once after every choice, with tuning and early stopping on a validation split carved from the training images.
+Baseline: Add multinomial logistic regression on the 784 pixels (Module 3), with C chosen on the validation split, as the course reference line in your figure; subsample = 1.0 then stays your reference within XGBoost.
+Error bars: Your five seeds give the spread due to subsampling. A test error rate near 0.10 on 10,000 images also has a standard error of about 0.003, so accuracy gaps under about half a point are ties unless your paired intervals say otherwise.
+
+First steps for the baseline checkpoint (Monday 9 November):
+1. Load the data, carve a stratified 10,000-image validation set from the training images, and keep the test set closed.
+2. Fit the logistic regression baseline and report validation accuracy with its standard error.
+3. Time one XGBoost fit (hist tree method, early stopping) at subsample 1.0 on a 10,000-image subset, to decide whether 5 ratios and 5 seeds on the full training set fit your compute.

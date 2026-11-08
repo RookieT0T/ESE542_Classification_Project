@@ -1,0 +1,28 @@
+# [Project title]
+
+## Group
+[Your Canvas group, and the members' first names]
+
+## Changes since the proposal
+[What you changed after the feedback, and why. "None" if nothing changed.]
+
+## Data
+[What you loaded: N, the number of inputs, the output, and any rows you dropped and why.]
+
+## Split
+[How you split the data (K folds, time order or a test set), the random seed, and what stays untouched until the end.]
+
+## Baseline
+[The course method, the grid you tuned over, and the setting K-fold CV chose.]
+
+## Result
+[The baseline's score with its error bar (a standard error or a bootstrap interval, Sections 4B and 4C), and how you computed it.]
+
+## Issues found
+[Data quality, alignment or leakage problems, or anything that surprised you.]
+
+## Next steps
+[What you will run before the early paper draft (Monday 16 November), and who does it.]
+
+## Code
+[A link to the notebook or repository that produced the result.]

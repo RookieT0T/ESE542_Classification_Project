@@ -1,0 +1,41 @@
+Due Monday 9 November 2026, 11:59 PM Eastern. One submission per group. Ungraded, but required. Before you start, read the feedback comment on your proposal submission.
+
+What to show. Your data and evaluation pipeline runs end to end and produces one baseline result with an error bar. The baseline is a course method (for example linear or logistic regression, kNN or ridge), tuned by K-fold cross-validation and scored on data it did not see (Section 4A).
+
+What to submit:
+
+baseline.txt (required): a plain-text file in the template below, under 500 words, with every ## heading kept as written and in the same order.
+baseline.png (optional): a first version of your key figure, even if it shows only the baseline.
+This assignment accepts only .txt and .png files. The member whose last name comes first in alphabetical order uploads for the whole group. Use first names only: no full names, Penn IDs or email addresses.
+
+# [Project title]
+
+## Group
+[Your Canvas group, and the members' first names]
+
+## Changes since the proposal
+[What you changed after the feedback, and why. "None" if nothing changed.]
+
+## Data
+[What you loaded: N, the number of inputs, the output, and any rows you dropped and why.]
+
+## Split
+[How you split the data (K folds, time order or a test set), the random seed, and what stays untouched until the end.]
+
+## Baseline
+[The course method, the grid you tuned over, and the setting K-fold CV chose.]
+
+## Result
+[The baseline's score with its error bar (a standard error or a bootstrap interval, Sections 4B and 4C), and how you computed it.]
+
+## Issues found
+[Data quality, alignment or leakage problems, or anything that surprised you.]
+
+## Next steps
+[What you will run before the early paper draft (Monday 16 November), and who does it.]
+
+## Code
+[A link to the notebook or repository that produced the result.]
+Common problems to avoid: scaling, imputing or selecting features on all the data before splitting; shuffling a time series into random folds; touching the test set before the end; reporting the best of many seeds.
+
+If something needs fixing before the early paper draft, you will receive a comment on your submission.

@@ -1,0 +1,31 @@
+# How does XGBoost's subsample ratio affect Fashion-MNIST accuracy and training time?
+
+## Group
+5420group: Jingran, Vivian, Zequan
+
+## Changes since the proposal
+Following the feedback, the question now concerns only XGBoost's row subsample ratio (the mini-batch/SGD wording was wrong: subsample is the fraction of rows each tree sees). Each ratio will get its own number of boosting rounds by early stopping, since smaller ratios may need more. We added multinomial logistic regression as the course baseline. The official test set will be used once, at the end.
+
+## Data
+Fashion-MNIST, loaded from the official files: 60,000 training images (28x28 grayscale, flattened to 784 inputs). The output is the clothing class, one of 10 labels, 6,000 images each. Pixels are divided by 255. No rows were dropped, because labels and images matched and nothing was missing. The 10,000 official test images are not loaded yet.
+
+## Split
+One random hold-out split of the 60,000 training images, made with scikit-learn's train_test_split: 10,000 images are held out for validation and 50,000 are used for fitting. The split is stratified (each class keeps its share) and uses seed 0. It is random rather than time-ordered because the images are independent. The official test set stays untouched until every choice is final.
+
+## Baseline
+Multinomial logistic regression, fit on the GPU with PyTorch (L-BFGS). C is the inverse strength of the L2 penalty on the weights: a small C penalizes large weights strongly (simpler model, may underfit); a large C penalizes weakly (flexible model, may overfit). We tried C in {0.001, 0.01, 0.1, 1, 10}, fit each on the 50,000 training images, and scored it on the 10,000 validation images. The validation set chose C = 0.1.
+
+## Result
+Validation accuracy 0.8573 +/- 0.0035. Accuracy is the fraction of the 10,000 validation images classified correctly by the model fit on the 50,000 training images; the error bar is the standard error sqrt(p(1-p)/n), with p = 0.8573 and n = 10,000. Accuracy for each C: 0.8138, 0.8487, 0.8573, 0.8522, 0.8476.
+
+## Issues found
+No data problems: images and labels align, classes are balanced, and the only preprocessing is a fixed division by 255 (nothing learned from data). One caveat: C was picked on the same validation images, so 0.8573 is slightly optimistic.
+Timing: subsample=0.2 trained only about 10% faster than 1.0, not 5x. We will report training times as measured.
+
+## Next steps
+Zequan: run 5 ratios x 5 seeds with early stopping (about 20 to 30 minutes on our laptop GPU; we will move to a faster GPU if the timing budget is tight).
+Vivian: paired confidence intervals and the key figure.
+Jingran: evaluate on the test set once at the end, after all choices are final.
+
+## Code
+[link]

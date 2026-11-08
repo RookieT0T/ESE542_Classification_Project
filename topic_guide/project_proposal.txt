@@ -1,0 +1,61 @@
+﻿# Topic: Investigating how mini-batch size affects optimization efficiency and classification performance.
+
+
+## Group
+5420group
+
+
+## Topic
+Own
+
+
+## Question
+How mini-batch size used in (stochastic) gradient descent optimization affects the XGBoost prediction accuracy in image classification workloads?
+
+
+## Why it matters
+Subsampling can reduce computational costs and potentially improve generalization by introducing randomness into model training. Understanding this tradeoff helps machine learning practitioners select efficient training configurations without sacrificing predictive performance.
+
+
+## Data
+Fashion-MNIST dataset (70,000 grayscale images, 10 clothing categories).
+The dataset contains 70,000 grayscale images across 10 clothing categories, with 60,000 training and 10,000 test images. Each 28×28 image will be flattened into 784 numerical features.
+https://github.com/zalandoresearch/fashion-mnist
+
+
+## Baseline
+An XGboost classifier trained with a subsampling ratio of 1, using all available training observations when constructing each tree. We will compare its performance against models trained with smaller subsampling ratios while keeping other parameters constant.
+
+
+## Comparison
+XGBoost classifiers with subsampling ratios of 0.2, 0.4, 0.6, and 0.8, compared against the full-data baseline (subsample=1.0).
+
+
+## Evaluation
+We will use a stratified training/validation split, reserving the official test set for final evaluation. We will compare classification accuracy, multiclass log loss, and training time across subsampling ratios. Each configuration will be trained with five random seeds, reporting means and standard deviations, with paired confidence intervals for performance differences. We hypothesize that moderate subsampling may improve efficiency while maintaining accuracy, whereas excessive subsampling may reduce predictive performance.
+
+
+
+
+## Key figure
+A two-panel figure showing validation accuracy and training time (y-axes) against subsampling ratio (x-axis), with error bars across five random seeds and the full-data baseline highlighted.
+
+
+## Risks and fallback
+XGBoost may train slowly on high-dimensional image data, and subsampling may produce only small performance differences. If computational costs become excessive, we will use a stratified subset of Fashion-MNIST while preserving the same experimental design. If accuracy differences are negligible, we will focus on training-time savings and the efficiency–accuracy tradeoff.
+
+
+## Who does what
+Jingran: Data preparation
+Vivian: Literature review
+Vivian, Zequan: Baseline model implementation 
+Zequan: Subsampling experiments, tune hyperparameters, record training performance
+Zequan: Evaluate results, perform statistical comparisons, create visualizations, and coordinate Zequan: Frame final report
+Vivian, Jingran: Limitations
+
+
+
+
+## AI plan
+We will use ChatGPT to assist with literature discovery, code development and debugging, and writing refinement. 
+All references, code, numerical results, and conclusions will be independently verified by group members.
