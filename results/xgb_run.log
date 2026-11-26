@@ -1,0 +1,26 @@
+0 runs already done, 25 to do
+[1/25] ratio=0.6 seed=4   46.9s  rounds=315  val_acc=0.9079  gpu 86C 1890MHz
+[2/25] ratio=0.2 seed=0   57.4s  rounds=356  val_acc=0.9019  gpu 87C 1335MHz
+[3/25] ratio=1.0 seed=3   52.8s  rounds=310  val_acc=0.9080  gpu 86C 1845MHz
+[4/25] ratio=0.8 seed=3   53.9s  rounds=309  val_acc=0.9083  gpu 86C 1822MHz
+[5/25] ratio=0.4 seed=1   62.2s  rounds=363  val_acc=0.9071  gpu 86C 1860MHz
+[6/25] ratio=0.4 seed=0   61.8s  rounds=360  val_acc=0.9047  gpu 86C 1237MHz
+[7/25] ratio=0.4 seed=2   58.1s  rounds=335  val_acc=0.9083  gpu 86C 1237MHz
+[8/25] ratio=0.6 seed=0   61.1s  rounds=347  val_acc=0.9090  gpu 86C 1237MHz
+[9/25] ratio=1.0 seed=2   54.0s  rounds=310  val_acc=0.9080  gpu 86C 1890MHz
+[10/25] ratio=1.0 seed=0   55.2s  rounds=310  val_acc=0.9080  gpu 86C 1237MHz
+[11/25] ratio=0.2 seed=4   65.6s  rounds=380  val_acc=0.9041  gpu 87C 1455MHz
+[12/25] ratio=0.2 seed=2   47.1s  rounds=269  val_acc=0.9006  gpu 86C 1822MHz
+[13/25] ratio=1.0 seed=1   54.1s  rounds=310  val_acc=0.9080  gpu 86C 1807MHz
+[14/25] ratio=0.2 seed=3   54.1s  rounds=313  val_acc=0.9031  gpu 86C 1237MHz
+[15/25] ratio=0.8 seed=2   56.0s  rounds=315  val_acc=0.9096  gpu 86C 1237MHz
+[16/25] ratio=0.6 seed=1   51.8s  rounds=294  val_acc=0.9069  gpu 86C 1687MHz
+[17/25] ratio=0.8 seed=4   58.4s  rounds=335  val_acc=0.9093  gpu 86C 1650MHz
+[18/25] ratio=0.4 seed=4   56.0s  rounds=325  val_acc=0.9075  gpu 86C 1237MHz
+[19/25] ratio=1.0 seed=4   53.8s  rounds=310  val_acc=0.9080  gpu 86C 1552MHz
+[20/25] ratio=0.8 seed=0   61.7s  rounds=350  val_acc=0.9077  gpu 86C 1237MHz
+[21/25] ratio=0.8 seed=1   57.4s  rounds=332  val_acc=0.9061  gpu 86C 1237MHz
+[22/25] ratio=0.4 seed=3   48.6s  rounds=278  val_acc=0.9044  gpu 86C 1237MHz
+[23/25] ratio=0.2 seed=1   51.3s  rounds=303  val_acc=0.9002  gpu 86C 1890MHz
+[24/25] ratio=0.6 seed=3   61.1s  rounds=353  val_acc=0.9078  gpu 86C 1297MHz
+[25/25] ratio=0.6 seed=2   57.9s  rounds=330  val_acc=0.9091  gpu 86C 1830MHz

@@ -1,0 +1,13 @@
+\begin{tabular}{lcccccc}
+\toprule
+Model & Val.\ accuracy & Val.\ log loss & Rounds & Fit time (s) & ms/round & $\Delta$ acc.\ vs.\ 1.0 (pts) \\
+\midrule
+Logistic regression & $0.8573 \pm 0.0035$\textsuperscript{a} & 0.4081 & -- & -- & -- & -- \\
+\midrule
+XGBoost, 0.2 & $0.9020 \pm 0.0016$ & $0.2671 \pm 0.0031$ & 324 & $55 \pm 7$ & 170 & $-0.60\ [-0.81, -0.40]$ \\
+XGBoost, 0.4 & $0.9064 \pm 0.0017$ & $0.2555 \pm 0.0018$ & 332 & $57 \pm 6$ & 173 & $-0.16\ [-0.38, +0.06]$ \\
+XGBoost, 0.6 & $0.9081 \pm 0.0009$ & $0.2519 \pm 0.0017$ & 328 & $56 \pm 6$ & 170 & $+0.01\ [-0.10, +0.13]$ \\
+XGBoost, 0.8 & $0.9082 \pm 0.0014$ & $0.2511 \pm 0.0015$ & 328 & $57 \pm 3$ & 175 & $+0.02\ [-0.15, +0.19]$ \\
+XGBoost, 1.0 (baseline) & $0.9080 \pm 0.0000$ & $0.2533 \pm 0.0000$ & 310 & $54 \pm 1$ & 174 & -- \\
+\bottomrule
+\end{tabular}

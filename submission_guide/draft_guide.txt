@@ -1,0 +1,12 @@
+Due Monday 16 November 2026, 11:59 PM Eastern. One submission per group. Ungraded but required; you will receive written feedback. Read your baseline feedback first.
+
+Submit draft.pdf: a first draft of the paper in the NeurIPS LaTeX style (the final format), up to 6 pages of main text. Unfinished is fine; prose quality is not assessed yet. It should contain:
+
+Title and abstract that state the question.
+Introduction: the question, why it matters, what you compare.
+Data: source and link, size and shape, the split.
+Method: the course baseline and the method(s) you compare it with, and how each is tuned (K-fold CV inside the training data).
+Experimental setup: the metric, the validation, how the error bars are computed.
+Preliminary results: at least the baseline with an error bar, in a labeled table or figure with a caption.
+An outline of the remaining sections, and the experiments still to run before Analysis Complete (Monday 30 November).
+The member whose last name comes first alphabetically uploads one PDF for the group.

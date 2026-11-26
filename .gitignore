@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 fashion-mnist/
 topic_guide/*.pdf
+results/models/
+paper/
+submission_guide/neurips_2026.tex
