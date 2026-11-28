@@ -1,15 +1,6 @@
-"""Summarize the 25 XGBoost runs and the logistic-regression baseline.
-
-Reads  results/xgb_runs.csv and results/logreg.json
-Writes results/summary.txt, results/table_main.tex (LaTeX table), results/key_figure.pdf/.png
-
-Error bars: mean +/- 1 standard deviation over the 5 seeds.
-Paired difference: for each seed, accuracy(ratio) - accuracy(1.0) with the SAME seed; the 95%
-confidence interval is a t-interval over the seeds (4 degrees of freedom -> t = 2.776).
-"""
+"""Summarize validation fits and write the validation table and key figure."""
 import csv
-import json
-from pathlib import Path
+from workflow import arguments, grid, output, read_json
 
 import matplotlib
 
@@ -17,12 +8,16 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-OUT = Path(__file__).resolve().parent / "results"
+args = arguments(__doc__).parse_args()
+OUT = output(args.smoke)
 T975 = {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365, 8: 2.306, 9: 2.262}
 
 with open(OUT / "xgb_runs.csv") as f:
-    runs = [{k: float(v) for k, v in r.items()} for r in csv.DictReader(f)]
-logreg = json.load(open(OUT / "logreg.json"))
+    runs = [{k: float(v) if v else float("nan") for k, v in r.items()} for r in csv.DictReader(f)]
+if sorted((r["ratio"], int(r["seed"])) for r in runs) != sorted(grid(args.smoke)):
+    raise SystemExit("Finish all validation fits before generating the summary.")
+logreg = read_json(OUT / "logreg.json")
+max_rounds = read_json(OUT / "xgb_config.json")["max_rounds"]
 ratios = sorted({r["ratio"] for r in runs})
 
 
@@ -61,7 +56,7 @@ for ratio in ratios:
 # GPU clock vs time per round over all runs (clock is a snapshot taken right after each fit)
 ms_round = np.array([r["fit_seconds"] / r["rounds_run"] * 1000 for r in runs])
 clock = np.array([r["gpu_clock_mhz"] for r in runs])
-corr = float(np.corrcoef(clock, ms_round)[0, 1])
+
 
 # ---------- text summary ----------
 lines = [f"{'ratio':>5} {'n':>2} {'val acc':>16} {'val logloss':>16} {'fit time s':>14} {'rounds':>13} {'ms/round':>12} "
@@ -73,11 +68,13 @@ for ratio, s in stats.items():
                  f"{s['ms_per_round'][0]:5.0f} +/- {s['ms_per_round'][1]:3.0f} {diff:>36}")
 lines.append("paired log-loss difference vs 1.0, x1000 [95% CI]: " + "; ".join(
     f"{r}: {s['dll'][0]:+.2f} [{s['dll'][1]:+.2f}, {s['dll'][2]:+.2f}]" for r, s in stats.items() if "dll" in s))
-lines.append(f"GPU clock (MHz) after each run: min {clock.min():.0f}, max {clock.max():.0f}; "
-             f"correlation of clock with ms/round over the {len(runs)} runs: {corr:+.2f}")
+if np.isfinite(clock).all():
+    corr = np.corrcoef(clock, ms_round)[0, 1] if clock.std() and ms_round.std() else float("nan")
+    lines.append(f"GPU clock (MHz) after each run: min {clock.min():.0f}, max {clock.max():.0f}; "
+                 f"correlation of clock with ms/round over the {len(runs)} runs: {corr:+.2f}")
 lines.append(f"logistic regression (C={logreg['best_C']}): val acc {logreg['val_accuracy']:.4f} +/- {logreg['val_se']:.4f} (SE), "
              f"val logloss {logreg['val_logloss']:.4f}")
-lines.append(f"runs that hit the {1000}-round cap: {sum(s['cap'] for s in stats.values())}")
+lines.append(f"runs that hit the {max_rounds}-round cap: {sum(s['cap'] for s in stats.values())}")
 (OUT / "summary.txt").write_text("\n".join(lines) + "\n")
 print("\n".join(lines))
 
@@ -121,7 +118,7 @@ for ax, field, ylabel in [(axes[0], "val_accuracy", "Validation accuracy"),
 a = axes[0]
 a.axhline(logreg["val_accuracy"], color=GRAY, lw=1.1, ls="--")
 a.text(0.16, logreg["val_accuracy"] + 0.0012, f"logistic regression ({logreg['val_accuracy']:.3f})", color=INK2, fontsize=7)
-a.annotate("full-data baseline\n(ratio 1.0)", xy=(1.0, stats[1.0]["acc"][0] - 0.0012), xytext=(0.99, 0.8935),
+a.annotate("full-data baseline\n(ratio 1.0)", xy=(1.0, stats[1.0]["acc"][0] - 0.0012), xytext=(0.98, 0.85), textcoords="axes fraction",
            color=INK2, fontsize=7, ha="right", va="top", arrowprops=dict(arrowstyle="-", color=INK2, lw=0.6))
 axes[0].set_title("(a) accuracy", loc="left", fontsize=8)
 axes[1].set_title("(b) training time", loc="left", fontsize=8)

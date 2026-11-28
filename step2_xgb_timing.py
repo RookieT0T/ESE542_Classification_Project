@@ -1,46 +1,89 @@
-"""Step 1.4: time ONE XGBoost fit (subsample = 1.0) on the full 50,000 training images.
-
-Purpose: find out whether 5 ratios x 5 seeds is affordable (25 fits ~ 25 x this time).
-Everything runs on the GPU: the data lives in GPU memory (CuPy arrays), XGBoost
-trains with device="cuda", and the predictions are computed and compared on the GPU.
-"""
+"""Benchmark fixed rounds with/without validation on the same host."""
+import random
 import time
+from statistics import mean, stdev
 
-import cupy as cp
-from xgboost import XGBClassifier
-
-from common import SEED, load_train_val
-
-X_train, y_train, X_val, y_val = (cp.asarray(a) for a in load_train_val())  # to GPU memory
+from workflow import RATIOS, arguments, data, host, output, read_json, record_config, save_csv, save_json
+from xgb_setup import device_arrays, fitted_config, gpu_state, model, xgb
 
 
-def make_model(n_rounds):
-    return XGBClassifier(
-        device="cuda",
-        tree_method="hist",          # fast histogram-based split search
-        max_bin=64,                  # 64 histogram bins per pixel instead of 256: ~30% faster, same accuracy
-        n_estimators=n_rounds,       # upper limit; early stopping picks the real number
-        learning_rate=0.1,
-        subsample=1.0,               # every row is used for every tree
-        early_stopping_rounds=20,    # stop when validation loss has not improved for 20 rounds
-        eval_metric="mlogloss",
-        random_state=SEED,
-    )
+def main():
+    args = arguments(__doc__).parse_args()
+    out = output(args.smoke)
+    devices = ("cpu",) if args.smoke else ("cpu", "cuda")
+    ratios = (0.4, 1.0) if args.smoke else RATIOS
+    rounds, repeats, threads = (4, 2, 2) if args.smoke else (100, 5, 4)
+    config = {
+        **host(), "xgboost": xgb.__version__, "rounds": rounds, "repeats": repeats,
+        "devices": list(devices), "ratios": list(ratios), "threads": threads,
+    }
+    if "cuda" in devices:
+        state = gpu_state()
+        config.update(gpu=state["gpu"], driver=state["driver"])
+    record_config(out / "timing_config.json", config)
+    arrays = data(args.smoke)
+    raw = {
+        path.stem: read_json(path)
+        for path in (out / "timing").glob("*.json")
+    }
+    paired = []
+    for device in devices:
+        complete = all(
+            f"{device}_{ratio}_{repeat}_{int(score)}" in raw
+            for ratio in ratios for repeat in range(repeats) for score in (False, True)
+        )
+        if complete:
+            print(f"{device} timing runs already saved", flush=True)
+        else:
+            (X, y, X_val, y_val), sync = device_arrays(device, arrays)
+            model(device, 1.0, 0, 1, threads=threads).fit(
+                X[:500], y[:500], eval_set=[(X_val, y_val)], verbose=False,
+            )
+        jobs = [(ratio, repeat) for ratio in ratios for repeat in range(repeats)]
+        random.Random(0).shuffle(jobs)
+        for ratio, repeat in jobs:
+            order = [False, True] if repeat % 2 == 0 else [True, False]
+            times = {}
+            for score in order:
+                path = out / "timing" / f"{device}_{ratio}_{repeat}_{int(score)}.json"
+                if path.stem in raw:
+                    row = raw[path.stem]
+                else:
+                    estimator = model(device, ratio, repeat, rounds, threads=threads)
+                    sync()
+                    start = time.perf_counter()
+                    estimator.fit(X, y, eval_set=[(X_val, y_val)] if score else None, verbose=False)
+                    sync()
+                    elapsed = time.perf_counter() - start
+                    fitted_config(estimator, device)
+                    row = {
+                        "device": device, "ratio": ratio, "repeat": repeat, "seed": repeat,
+                        "validation": score, "rounds": estimator.get_booster().num_boosted_rounds(),
+                        "fit_seconds": elapsed, "seconds_per_round": elapsed / rounds,
+                    }
+                    save_json(path, row)
+                    print(row, flush=True)
+                raw[path.stem] = row
+                times[score] = row["seconds_per_round"] * 1000
+                save_csv(out / "timing_runs.csv", list(raw.values()))
+            paired.append({
+                "device": device, "ratio": ratio, "repeat": repeat,
+                "training_ms_per_round": times[False], "with_validation_ms_per_round": times[True],
+                "validation_overhead_ms_per_round": times[True] - times[False],
+            })
+            save_csv(out / "timing_pairs.csv", paired)
+    summary = []
+    for device in devices:
+        for ratio in ratios:
+            group = [row for row in paired if row["device"] == device and row["ratio"] == ratio]
+            metrics = {}
+            for key in ("training_ms_per_round", "with_validation_ms_per_round", "validation_overhead_ms_per_round"):
+                values = [row[key] for row in group]
+                metrics[f"mean_{key}"] = mean(values)
+                metrics[f"sd_{key}"] = stdev(values)
+            summary.append({"device": device, "ratio": ratio, "repeats": repeats, **metrics})
+    save_csv(out / "timing_summary.csv", summary)
 
 
-# Warm-up: the first GPU call pays a one-off start-up cost; don't count it.
-make_model(1).fit(X_train[:500], y_train[:500], eval_set=[(X_val[:500], y_val[:500])], verbose=False)
-
-model = make_model(1000)
-start = time.perf_counter()
-model.fit(X_train, y_train, eval_set=[(X_val, y_val)], verbose=False)
-cp.cuda.Stream.null.synchronize()  # make sure the GPU work is finished before stopping the clock
-seconds = time.perf_counter() - start
-
-acc = float((cp.asarray(model.predict(X_val)) == y_val).mean())
-se = (acc * (1 - acc) / len(y_val)) ** 0.5
-
-print(f"fit time ({len(y_train)} rows) : {seconds:.1f} s")
-print(f"best round              : {model.best_iteration}")
-print(f"validation accuracy     : {acc:.4f} +/- {se:.4f}")
-print(f"\nEstimated 25 fits (5 ratios x 5 seeds): {25 * seconds / 60:.0f} min")
+if __name__ == "__main__":
+    main()
